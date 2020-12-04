@@ -1,4 +1,4 @@
-package mainu
+package main
 
 import (
 	"bufio"
@@ -12,8 +12,6 @@ import (
 	"time"
 )
 
-//var direcciones = []string{"102.168.0.12"}
-
 var direccion_nodo string
 
 const (
@@ -23,7 +21,7 @@ const (
 	puerto_solicitud = 8003
 )
 
-var bitacora []string
+var bitacora = []string{"192.168.101.9", "192.168.101.25"}
 
 type Info struct {
 	Tipo     string
@@ -44,26 +42,26 @@ var ticket int
 
 func main() {
 	//Identificación = IP
-	//direccion_nodo = descubreIP() //"192.168.101.12"
-	direccion_nodo = "192.168.0.4"
+	direccion_nodo = descubreIP() //"192.168.101.12"
 	fmt.Printf("IP = %s\n", direccion_nodo)
 	//Server
-	go registrarServidor()
-	go registrarProceso()
+	//go registrarServidor()
+	//go registrarProceso()
 	//Client
 	//A que nodo se requiere unir???
-	bufferIn := bufio.NewReader(os.Stdin)
-	fmt.Print("Ingrese el Ip del nodo a unir: ")
-	strDirNodoRem, _ := bufferIn.ReadString('\n')
-	strDirNodoRem = strings.TrimSpace(strDirNodoRem)
-	if strDirNodoRem != "" {
-		registrarCliente(strDirNodoRem)
-	}
-
+	//bufferIn := bufio.NewReader(os.Stdin)
+	/*
+		fmt.Print("Ingrese el Ip del nodo a unir: ")
+		strDirNodoRem, _ := bufferIn.ReadString('\n')
+		strDirNodoRem = strings.TrimSpace(strDirNodoRem)
+		if strDirNodoRem != "" {
+			registrarCliente(strDirNodoRem)
+		}
+	*/
 	//generaciòn de ticket
 	rand.Seed(time.Now().UTC().UnixNano())
 	ticket = rand.Intn(1000000)
-	fmt.Println(ticket)
+	fmt.Printf("Nro Ticket %d\n", ticket)
 
 	//crear los canales
 	puedeIniciar = make(chan bool)
@@ -76,9 +74,11 @@ func main() {
 	go func() {
 		fmt.Println("Presiona enter para Iniciar la solicitud...")
 		bufferIn := bufio.NewReader(os.Stdin)
-		bufferIn.ReadString('\n')
+		msg, _ := bufferIn.ReadString('\n')
+		fmt.Println(msg)
 		info := Info{"SENDNUM", ticket, direccion_nodo}
 		//enviar a todos los nodos de la red
+		fmt.Println("paso enviar")
 		for _, direccion := range bitacora {
 			go enviarSolicitud(direccion, info)
 		}
@@ -86,7 +86,7 @@ func main() {
 
 	escucharSolicitud()
 	//servidor
-	escucharNotificaciones()
+	//escucharNotificaciones()
 }
 
 func registrarServidor() {
@@ -216,7 +216,7 @@ func enviarNumero(num int) {
 }
 
 func escucharSolicitud() {
-	hostname := fmt.Sprintf("%s;%d", direccion_nodo, puerto_solicitud)
+	hostname := fmt.Sprintf("%s:%d", direccion_nodo, puerto_solicitud)
 	ln, _ := net.Listen("tcp", hostname)
 	defer ln.Close()
 	for {
