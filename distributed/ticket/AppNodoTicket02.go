@@ -21,7 +21,7 @@ const (
 	puerto_solicitud = 8003
 )
 
-var bitacora = []string{"192.168.0.12"}
+var bitacora = []string{"localhost:9002", "localhost:9000"}
 
 type Info struct {
 	Tipo     string
@@ -42,8 +42,8 @@ var ticket int
 
 func main() {
 	//Identificación = IP
-	direccion_nodo = descubreIP() //"192.168.101.12"
-	fmt.Printf("IP = %s\n", direccion_nodo)
+	direccion_nodo = "localhost:9001"
+	//fmt.Printf("IP = %s\n", direccion_nodo)
 	//Server
 	//go registrarServidor()
 	//go registrarProceso()
@@ -216,8 +216,8 @@ func enviarNumero(num int) {
 }
 
 func escucharSolicitud() {
-	hostname := fmt.Sprintf("%s:%d", direccion_nodo, puerto_solicitud)
-	ln, _ := net.Listen("tcp", hostname)
+	//hostname := fmt.Sprintf("%s:%d", direccion_nodo, puerto_solicitud)
+	ln, _ := net.Listen("tcp", direccion_nodo)
 	defer ln.Close()
 	for {
 		conn, _ := ln.Accept()
@@ -263,9 +263,9 @@ func manejadorSolicitudes(conn net.Conn) {
 
 func enviarSolicitud(direccion string, msg Info) {
 	//envìa la info a todos los nodos
-	remoteHost := strings.TrimSpace(direccion)
-	remoteHost = fmt.Sprintf("%s:%d", remoteHost, puerto_solicitud)
-	conn, _ := net.Dial("tcp", remoteHost)
+	//remoteHost := strings.TrimSpace(direccion)
+	//remoteHost = fmt.Sprintf("%s:%d", remoteHost, puerto_solicitud)
+	conn, _ := net.Dial("tcp", direccion)
 	defer conn.Close()
 	bMsg, _ := json.Marshal(msg)
 	fmt.Fprintln(conn, string(bMsg))
